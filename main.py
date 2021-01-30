@@ -7,7 +7,8 @@ import config
 import models
 import data
 
-def train():
+
+def train(state_file):
     train_dataloader, valid_dataloader = data.load_training_data()
 
     train_len = len(train_dataloader.dataset)
@@ -16,7 +17,7 @@ def train():
     net = models.base_model().to(config.device)
 
     try:
-        net.load_state_dict(torch.load(config.state_file))
+        net.load_state_dict(torch.load(state_file))
     except Exception:
         pass
 
@@ -57,14 +58,15 @@ def train():
             if valid_loss < min_loss:
                 min_loss = valid_loss
                 print('*** save ***')
-                torch.save(net.state_dict(), config.state_file)
+                torch.save(net.state_dict(), state_file)
 
-def test():
+
+def test(state_file, submission_file):
     test_dataloader = data.load_test_data()
 
     net = models.base_model().to(config.device)
     try:
-        net.load_state_dict(torch.load(config.state_file))
+        net.load_state_dict(torch.load(state_file))
     except Exception:
         pass
     net.eval()
@@ -75,7 +77,7 @@ def test():
         outputs = net(images)
 
     
-    csv_file = open('submission.csv', 'w')
+    csv_file = open(submission_file, 'w')
 
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(['Image_ID', 'x', 'y', 'w', 'h'])
@@ -86,10 +88,8 @@ def test():
 
     
 
-
-
 if __name__ == '__main__':
-    # train()
-    test()
+    # train(config.state_file)
+    # test(config.state_file, 'submissions/submission.csv')
     pass
     
