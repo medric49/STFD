@@ -104,6 +104,8 @@ def load_training_data():
 def load_test_data():
     image_transform = utils.default_image_transform()
     test_dataset = TestImageDataset(image_transform, config.image_dir, config.train_csv_file)
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=len(test_dataset))
+    return test_dataloader
 
 
 if __name__ == '__main__':

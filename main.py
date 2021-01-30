@@ -1,12 +1,13 @@
 import numpy as np
 import torch
 from torch import nn
+import csv
 
 import config
 import models
 import data
 
-if __name__ == '__main__':
+def train():
     train_dataloader, valid_dataloader = data.load_training_data()
 
     train_len = len(train_dataloader.dataset)
@@ -20,7 +21,7 @@ if __name__ == '__main__':
         pass
 
     criterion = nn.MSELoss()
-    optimizer = torch.optim.SGD(params=net.parameters(), lr=config.learning_rate)
+    optimizer = torch.optim.Adam(params=net.parameters(), lr=config.learning_rate)
 
     min_loss = np.inf
 
@@ -57,3 +58,38 @@ if __name__ == '__main__':
                 min_loss = valid_loss
                 print('*** save ***')
                 torch.save(net.state_dict(), config.state_file)
+
+def test():
+    test_dataloader = data.load_test_data()
+
+    net = models.base_model().to(config.device)
+    try:
+        net.load_state_dict(torch.load(config.state_file))
+    except Exception:
+        pass
+    net.eval()
+
+    images, image_ids = next(iter(test_dataloader))
+
+    with torch.no_grad():
+        outputs = net(images)
+
+    
+    csv_file = open('submission.csv', 'w')
+
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['Image_ID', 'x', 'y', 'w', 'h'])
+
+    for i, output in enumerate(outputs):
+        csv_writer.writerow([image_ids[i], output[0].item(), output[1].item(), output[2].item(), output[3].item()])
+    csv_file.close()
+
+    
+
+
+
+if __name__ == '__main__':
+    # train()
+    test()
+    pass
+    
