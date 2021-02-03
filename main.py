@@ -6,9 +6,12 @@ import csv
 import config
 import models
 import data
+import torchvision.ops
+
+import utils
 
 
-def train(network):
+def train(network, min_loss=np.inf):
     network.to(config.device)
     train_dataloader, valid_dataloader = data.load_training_data()
 
@@ -16,10 +19,7 @@ def train(network):
     valid_len = len(valid_dataloader.dataset)
 
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(params=network.parameters(), lr=config.learning_rate)
-
-    min_loss = np.inf
-
+    optimizer = torch.optim.Adam(params=network.parameters(), lr=config.learning_rate, betas=(0.9, 0.995))
     for epoch in range(config.epochs):
         print(f'#### Epoch {epoch} #####')
         train_loss = 0
@@ -64,10 +64,9 @@ def test(network, submission_file):
     outputs = []
 
     with torch.no_grad():
-    	for image, image_id in test_dataloader:
-        	output = network(image)
-        	outputs.append((image_id[0], output[0]))
-
+        for image, image_id in test_dataloader:
+            output = network(image)
+            outputs.append((image_id[0], output[0]))
 
     csv_file = open(submission_file, 'w')
     csv_writer = csv.writer(csv_file)
@@ -79,9 +78,8 @@ def test(network, submission_file):
 
 
 if __name__ == '__main__':
-    # network = models.BaseModel('base_model_state.pt')
-    # network = models.PrefixBasedModel('prefix_based_model.pt', 'prefix_based_model_2.pt')
-    network = models.PrefixBasedModel('prefix_based_model_2.pt')
+    # network = models.BaseModel('base_model_state_4.pt')
+    network = models.PrefixBasedModel('prefix_based_model_3.pt', 'prefix_based_model_3.pt', pretrained=True)
 
-    # train(network)
-    test(network, 'submissions/submission_2.csv')
+    train(network, 0.006281035877011641)
+    # test(network, 'submissions/submission_4.csv')

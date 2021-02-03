@@ -10,9 +10,11 @@ batch_size = 64
 
 valid_ratio = 0.15
 
-epochs = 20
+epochs = 30
 
-learning_rate = 0.001
+learning_rate = 0.0005
+
+dropout_prob = 0.
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
